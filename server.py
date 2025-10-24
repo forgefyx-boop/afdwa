@@ -1,10 +1,11 @@
 from flask import Flask, request
-import json, os
+import os
+import json
 
 app = Flask(__name__)
 
-# Use your full HTML as a string
-HTML_PAGE = """ 
+# --- Full HTML (with /static references for images) ---
+HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -339,10 +340,10 @@ HTML_PAGE = """
   </footer>
 </body>
 </html>
-""" 
+"""
 
+# Function to save email/password into database.json
 def save_to_db(entry):
-    """Append a new record to database.json"""
     if os.path.exists("database.json"):
         try:
             with open("database.json", "r", encoding="utf-8") as f:
@@ -355,10 +356,12 @@ def save_to_db(entry):
     with open("database.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
+# Home page serving login/register form
 @app.route('/')
 def home():
     return HTML_PAGE
 
+# Handle POST from the form
 @app.route('/register', methods=['POST'])
 def register():
     email = request.form.get('email')
@@ -366,5 +369,6 @@ def register():
     save_to_db({"email": email, "password": password})
     return "<h2>Registration submitted and saved!</h2>"
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
